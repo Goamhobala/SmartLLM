@@ -957,6 +957,20 @@ export default function KnowledgeGraphPage() {
     startSim(0.6)
   }
 
+  // ── Bulk approve ──────────────────────────────────────────────────────────
+  const handleApproveNodes = useCallback((ids: string[]) => {
+    nodesRef.current = nodesRef.current.map(n =>
+      ids.includes(n.id) ? { ...n, status: "approved" as const } : n
+    )
+    setNodes([...nodesRef.current])
+    setSelectedForApproval(prev => {
+      const next = new Set(prev)
+      ids.forEach(id => next.delete(id))
+      return next
+    })
+    setKBState(nodesRef.current.map(({ x, y, vx, vy, pinned, ...n }) => n), edgesRef.current)
+  }, [])  // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Derived ───────────────────────────────────────────────────────────────
   const selectedNode  = nodes.find(n => n.id === selected)
   const hoveredNode   = nodes.find(n => n.id === hovered)
@@ -966,6 +980,10 @@ export default function KnowledgeGraphPage() {
   const relCount      = edges.filter(e => e.type === "related").length
   const isSidebarOpen = (selected && selectedNode) || isAdding || isAddingDomain
   const currentStage  = UPLOAD_STAGES[uploadStageIdx]
+  const pendingNodes  = nodes
+    .filter(n => n.type === "intent" && n.status === "pending")
+    .slice()
+    .sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated))
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden">
@@ -1037,7 +1055,8 @@ export default function KnowledgeGraphPage() {
       </div>
 
       {/* ── Body ── */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-col flex-1 overflow-hidden min-h-0">
+      <div className="flex flex-1 overflow-hidden min-h-0">
         {/* Graph */}
         <div className="relative flex-1 overflow-hidden">
           <svg
@@ -1243,6 +1262,128 @@ export default function KnowledgeGraphPage() {
             />
           ) : null
         )}
+      </div>
+
+      {/* ── Pending Review Queue ── */}
+      <div className={`shrink-0 border-t border-border bg-card transition-all duration-200 ${reviewOpen ? "h-56" : "h-10"}`}>
+        {/* Queue header */}
+        <div
+          className="flex items-center justify-between px-6 h-10 cursor-pointer select-none hover:bg-secondary/30 transition-colors"
+          onClick={() => setReviewOpen(o => !o)}
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-semibold text-foreground uppercase tracking-wide">Pending Review</span>
+            {pendingNodes.length > 0 && (
+              <span className="rounded-full bg-amber-500/15 text-amber-700 text-[10px] font-semibold px-2 py-0.5">
+                {pendingNodes.length}
+              </span>
+            )}
+            {selectedForApproval.size > 0 && (
+              <button
+                onClick={e => { e.stopPropagation(); handleApproveNodes([...selectedForApproval]) }}
+                className="flex items-center gap-1 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-medium px-2.5 py-1 transition-colors"
+              >
+                <Check className="size-3" />
+                Approve {selectedForApproval.size} selected
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {pendingNodes.length === 0 && (
+              <span className="text-[11px] text-muted-foreground">No pending entries — KB is fully reviewed</span>
+            )}
+            {reviewOpen ? <ChevronDown className="size-3.5 text-muted-foreground" /> : <ChevronUp className="size-3.5 text-muted-foreground" />}
+          </div>
+        </div>
+
+        {/* Queue table */}
+        {reviewOpen && (
+          <div className="overflow-auto h-[calc(100%-2.5rem)]">
+            {pendingNodes.length === 0 ? (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-sm text-muted-foreground">All knowledge has been reviewed and approved.</p>
+              </div>
+            ) : (
+              <table className="w-full text-xs">
+                <thead className="sticky top-0 bg-card border-b border-border z-10">
+                  <tr>
+                    <th className="w-10 px-4 py-2 text-left">
+                      <input
+                        type="checkbox"
+                        className="rounded"
+                        checked={selectedForApproval.size === pendingNodes.length && pendingNodes.length > 0}
+                        onChange={e => {
+                          if (e.target.checked) setSelectedForApproval(new Set(pendingNodes.map(n => n.id)))
+                          else setSelectedForApproval(new Set())
+                        }}
+                      />
+                    </th>
+                    <th className="px-3 py-2 text-left font-medium text-muted-foreground">Intent</th>
+                    <th className="px-3 py-2 text-left font-medium text-muted-foreground">Category</th>
+                    <th className="px-3 py-2 text-left font-medium text-muted-foreground">Answer preview</th>
+                    <th className="px-3 py-2 text-left font-medium text-muted-foreground">Hits</th>
+                    <th className="px-3 py-2 text-left font-medium text-muted-foreground">Date</th>
+                    <th className="px-3 py-2 text-left font-medium text-muted-foreground"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pendingNodes.map(node => {
+                    const meta = CATEGORY_META[node.category]
+                    const isChecked = selectedForApproval.has(node.id)
+                    return (
+                      <tr
+                        key={node.id}
+                        className={`border-b border-border/50 hover:bg-secondary/20 transition-colors cursor-pointer ${isChecked ? "bg-emerald-500/5" : ""}`}
+                        onClick={() => { setSelected(node.id); setIsAdding(false); setIsAddingDomain(false) }}
+                      >
+                        <td className="px-4 py-2" onClick={e => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            className="rounded"
+                            checked={isChecked}
+                            onChange={e => {
+                              setSelectedForApproval(prev => {
+                                const next = new Set(prev)
+                                if (e.target.checked) next.add(node.id)
+                                else next.delete(node.id)
+                                return next
+                              })
+                            }}
+                          />
+                        </td>
+                        <td className="px-3 py-2 font-medium text-foreground whitespace-nowrap">{node.label}</td>
+                        <td className="px-3 py-2 whitespace-nowrap">
+                          <span
+                            className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium"
+                            style={{ backgroundColor: meta?.bg, color: meta?.color }}
+                          >
+                            <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: meta?.color }} />
+                            {meta?.label ?? node.category}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-muted-foreground max-w-xs">
+                          <span className="line-clamp-1">{node.answer}</span>
+                        </td>
+                        <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{node.hitCount}</td>
+                        <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{node.lastUpdated}</td>
+                        <td className="px-3 py-2" onClick={e => e.stopPropagation()}>
+                          <button
+                            onClick={() => handleApproveNodes([node.id])}
+                            className="flex items-center gap-1 rounded-md border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10 px-2 py-1 transition-colors whitespace-nowrap"
+                          >
+                            <Check className="size-3" />
+                            Approve
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+      </div>
       </div>
 
       {/* Upload overlay */}
