@@ -1,3 +1,5 @@
+import { addPendingKBEntry } from "./kb-store"
+
 export interface RequestLogEntry {
   id: string
   time: string
@@ -43,7 +45,7 @@ export type DemoAction =
   | { type: "KB_HIT_PASSWORD" }
   | { type: "KB_HIT_LOGIN" }
   | { type: "KB_HIT_CANCEL" }
-  | { type: "LLM_ROUTE_ZAPIER" }
+  | { type: "LLM_ROUTE_RAG_FORUM" }
   | { type: "LLM_ROUTE_DISCOUNT" }
   | { type: "IMAGE_CACHE_HIT" }
   | { type: "BULK_50_KB" }
@@ -111,7 +113,7 @@ export function dashboardReducer(state: DashboardState, action: DemoAction): Das
         kbLatencies: [...state.kbLatencies, 88],
       }
     }
-    case "LLM_ROUTE_ZAPIER": {
+    case "LLM_ROUTE_RAG_FORUM": {
       const entry: RequestLogEntry = {
         id: `req-${++counter}`,
         time: getTimeString(),
@@ -121,6 +123,17 @@ export function dashboardReducer(state: DashboardState, action: DemoAction): Das
         cost: 0.0016,
         latency: 820,
       }
+      addPendingKBEntry({
+        id: "rag-zapier-integration",
+        label: "Zapier Integration",
+        type: "intent",
+        category: "payflow-business",
+        answer: "PayFlow supports Zapier via our REST API. Connect PayFlow to 5,000+ apps through Zapier's platform. For a pre-built Zap, search 'PayFlow' in the Zapier app directory. For custom automation, use our webhook endpoints documented at developers.payflow.co.za.",
+        exampleQueries: ["Do you integrate with Zapier?", "Zapier connection", "Automate PayFlow workflows"],
+        status: "pending",
+        hitCount: 1,
+        lastUpdated: new Date().toISOString().split("T")[0],
+      })
       return {
         ...state,
         requests: [entry, ...state.requests],
@@ -141,6 +154,17 @@ export function dashboardReducer(state: DashboardState, action: DemoAction): Das
         cost: 0.0018,
         latency: 910,
       }
+      addPendingKBEntry({
+        id: "rag-bulk-discount",
+        label: "Bulk / Team Pricing",
+        type: "intent",
+        category: "payflow-business",
+        answer: "Volume discounts are available for businesses processing more than R500,000/month. Contact bizdev@payflow.co.za with your merchant ID and expected monthly volume to receive a custom pricing proposal. Discounts typically range from 10–30% on transaction fees.",
+        exampleQueries: ["Can I get a bulk discount?", "Team pricing", "Volume discount for my company"],
+        status: "pending",
+        hitCount: 1,
+        lastUpdated: new Date().toISOString().split("T")[0],
+      })
       return {
         ...state,
         requests: [entry, ...state.requests],

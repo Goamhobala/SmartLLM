@@ -12,7 +12,7 @@ const buttons: { label: string; action: DemoAction; color: string }[] = [
   { label: "KB Hit: Password Reset", action: { type: "KB_HIT_PASSWORD" }, color: "bg-emerald-600 hover:bg-emerald-700 text-white" },
   { label: "KB Hit: Forgot Login", action: { type: "KB_HIT_LOGIN" }, color: "bg-emerald-600 hover:bg-emerald-700 text-white" },
   { label: "KB Hit: Cancel Account", action: { type: "KB_HIT_CANCEL" }, color: "bg-emerald-600 hover:bg-emerald-700 text-white" },
-  { label: "LLM Route: Zapier", action: { type: "LLM_ROUTE_ZAPIER" }, color: "bg-amber-600 hover:bg-amber-700 text-white" },
+  { label: "LLM Route: RAG forum lookup", action: { type: "LLM_ROUTE_ZAPIER" }, color: "bg-amber-600 hover:bg-amber-700 text-white" },
   { label: "LLM Route: Bulk Discount", action: { type: "LLM_ROUTE_DISCOUNT" }, color: "bg-amber-600 hover:bg-amber-700 text-white" },
   { label: "Image Cache Hit", action: { type: "IMAGE_CACHE_HIT" }, color: "bg-sky-600 hover:bg-sky-700 text-white" },
   { label: "Bulk: 50 KB Hits", action: { type: "BULK_50_KB" }, color: "bg-indigo-600 hover:bg-indigo-700 text-white" },

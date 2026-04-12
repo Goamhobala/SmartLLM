@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { Upload, Plus, X, Edit2, Trash2, FileText, Loader2, ZoomIn, ZoomOut, Maximize2, Check } from "lucide-react"
+import { Upload, Plus, X, Edit2, Trash2, FileText, Loader2, ZoomIn, ZoomOut, Maximize2, Check, Globe, ChevronUp, ChevronDown } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import {
-  KBNode, KBEdge, SimNode, CATEGORY_META,
+  KBNode, KBEdge, KBProject, SimNode, CATEGORY_META,
   PAYFLOW_NODES, PAYFLOW_EDGES, initSimNodes,
 } from "@/lib/kb-graph-data"
+import { useKBStore, setKBState, addRagDomain, removeRagDomain } from "@/lib/kb-store"
 
 // ─── Simulation constants ────────────────────────────────────────────────────
 const REPULSION_CAT  = 22000
@@ -173,6 +174,11 @@ function NodeSidebar({
     setEditing(false)
   }
 
+  const handleToggleStatus = () => {
+    const newStatus = form.status === "approved" ? "pending" : "approved"
+    onSave({ ...form, status: newStatus, exampleQueries: queries.filter(q => q.trim()) })
+  }
+
   return (
     <div className="w-80 border-l border-border bg-card flex flex-col overflow-hidden shrink-0">
       {/* Header */}
@@ -313,7 +319,7 @@ function NodeSidebar({
       </div>
 
       {/* Footer */}
-      <div className="border-t border-border p-3 flex gap-2">
+      <div className="border-t border-border p-3 flex gap-2 justify-center">
         {editing ? (
           <>
             <button
@@ -331,13 +337,28 @@ function NodeSidebar({
             </button>
           </>
         ) : (
-          <button
-            onClick={() => onDelete(node.id)}
-            className="flex items-center gap-1.5 rounded-lg border border-destructive/30 px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/5 transition-colors w-full justify-center"
-          >
-            <Trash2 className="size-3.5" />
-            {node.type === "category" ? "Delete Category & All Intents" : "Delete Node"}
-          </button>
+          <div className="flex flex-col gap-2 w-full justify-center">
+            {node.type === "intent" && (
+              <button
+                onClick={handleToggleStatus}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors w-full justify-center ${
+                  form.status === "approved"
+                    ? "border border-amber-500/30 text-amber-600 hover:bg-amber-500/5"
+                    : "border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/5"
+                }`}
+              >
+                <Check className="size-3.5" />
+                {form.status === "approved" ? "Mark for Review" : "Approve Knowledge"}
+              </button>
+            )}
+            <button
+              onClick={() => onDelete(node.id)}
+              className="flex items-center gap-1.5 rounded-lg border border-destructive/30 px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/5 transition-colors w-full justify-center"
+            >
+              <Trash2 className="size-3.5" />
+              {node.type === "category" ? "Delete Category & All Intents" : "Delete Node"}
+            </button>
+          </div>
         )}
       </div>
     </div>
@@ -473,6 +494,111 @@ function AddNodePanel({
   )
 }
 
+// ─── RagDomainPanel ───────────────────────────────────────────────────────────
+// Manages the whitelist of domains the RAG tier is allowed to retrieve from.
+// Adding a domain here does NOT add a node to the graph — it only tells the
+// routing pipeline where to pull context. Answers the RAG tier generates from
+// real customer queries get surfaced as pending KB nodes automatically.
+function RagDomainPanel({
+  onClose,
+}: {
+  onClose: () => void
+}) {
+  const { ragDomains } = useKBStore()
+  const [url, setUrl]   = useState("")
+  const [desc, setDesc] = useState("")
+
+  const handleAdd = () => {
+    const trimmed = url.trim()
+    if (!trimmed) return
+    addRagDomain(trimmed, desc.trim())
+    setUrl("")
+    setDesc("")
+  }
+
+  return (
+    <div className="w-80 border-l border-border bg-card flex flex-col overflow-hidden shrink-0">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <div className="flex items-center gap-2">
+          <Globe className="size-3.5 text-cyan-600" />
+          <p className="font-semibold text-sm text-foreground">RAG Domain Whitelist</p>
+        </div>
+        <button onClick={onClose} className="p-1.5 rounded-md hover:bg-secondary/60 text-muted-foreground transition-colors">
+          <X className="size-3.5" />
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Explainer */}
+        <div className="rounded-lg bg-cyan-500/8 border border-cyan-500/20 px-3 py-2.5 space-y-1">
+          <p className="text-xs font-medium text-cyan-700">Tier 2 — RAG-Enhanced Routing</p>
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            When a query doesn't match the KB, the gateway checks these domains. If the query is in-domain, it retrieves relevant context and routes to a cheap model. Answers get surfaced here as pending nodes — approve them to grow the KB and cut future costs.
+          </p>
+        </div>
+
+        {/* Current whitelist */}
+        <div>
+          <p className="text-xs font-medium text-muted-foreground mb-2">Whitelisted Domains ({ragDomains.length})</p>
+          <div className="space-y-2">
+            {ragDomains.map(d => (
+              <div key={d.id} className="flex items-start gap-2 rounded-lg border border-border bg-background px-3 py-2">
+                <Globe className="size-3 text-cyan-600 mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-mono font-medium text-foreground truncate">{d.url}</p>
+                  {d.description && (
+                    <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">{d.description}</p>
+                  )}
+                </div>
+                <button
+                  onClick={() => removeRagDomain(d.id)}
+                  className="p-0.5 text-muted-foreground hover:text-destructive transition-colors shrink-0"
+                >
+                  <X className="size-3" />
+                </button>
+              </div>
+            ))}
+            {ragDomains.length === 0 && (
+              <p className="text-xs text-muted-foreground italic">No domains whitelisted yet.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Add new domain */}
+        <div className="pt-2 border-t border-border space-y-3">
+          <p className="text-xs font-medium text-muted-foreground">Add Domain</p>
+          <div>
+            <input
+              value={url}
+              onChange={e => setUrl(e.target.value)}
+              placeholder="e.g. developers.payflow.co.za"
+              className="w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm text-foreground font-mono focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
+          <div>
+            <textarea
+              rows={2}
+              value={desc}
+              onChange={e => setDesc(e.target.value)}
+              placeholder="What content does this domain cover? (optional)"
+              className="w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+            />
+          </div>
+          <button
+            onClick={handleAdd}
+            disabled={!url.trim()}
+            className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-cyan-600 px-3 py-2 text-sm font-medium text-white hover:bg-cyan-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Plus className="size-3.5" />
+            Add to Whitelist
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Upload stages ───────────────────────────────────────────────────────────
 const UPLOAD_STAGES = [
   { text: "Parsing payflow-customer-support-faq.docx…", pct: 12 },
@@ -483,11 +609,33 @@ const UPLOAD_STAGES = [
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function KnowledgeGraphPage() {
-  const [nodes, setNodes] = useState<SimNode[]>(() => initSimNodes(PAYFLOW_NODES))
-  const [edges, setEdges] = useState<KBEdge[]>(PAYFLOW_EDGES)
+  // ── Project state ─────────────────────────────────────────────────────────
+  const [projects, setProjects] = useState<KBProject[]>(() => [
+    { id: "payflow", name: "PayFlow", nodes: PAYFLOW_NODES, edges: PAYFLOW_EDGES, createdAt: "2026-03-01" },
+  ])
+  const [activeProjectId, setActiveProjectId] = useState("payflow")
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false)
+  const [newProjectName, setNewProjectName] = useState("")
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+
+  const projectsRef        = useRef<KBProject[]>(projects)
+  const activeProjectIdRef = useRef(activeProjectId)
+
+  useEffect(() => { projectsRef.current = projects },              [projects])
+  useEffect(() => { activeProjectIdRef.current = activeProjectId }, [activeProjectId])
+
+  // ── Shared KB store ───────────────────────────────────────────────────────
+  const kbStore = useKBStore()
+
+  // ── Graph state ───────────────────────────────────────────────────────────
+  const [nodes, setNodes] = useState<SimNode[]>(() => initSimNodes(kbStore.nodes))
+  const [edges, setEdges] = useState<KBEdge[]>(kbStore.edges)
   const [hovered, setHovered]   = useState<string | null>(null)
   const [selected, setSelected] = useState<string | null>(null)
   const [isAdding, setIsAdding] = useState(false)
+  const [isAddingDomain, setIsAddingDomain] = useState(false)
+  const [reviewOpen, setReviewOpen] = useState(true)
+  const [selectedForApproval, setSelectedForApproval] = useState<Set<string>>(new Set())
   const [uploadState, setUploadState] = useState<"idle" | "processing" | "done">("idle")
   const [uploadStageIdx, setUploadStageIdx] = useState(0)
   // Pan / zoom
@@ -515,6 +663,33 @@ export default function KnowledgeGraphPage() {
   useEffect(() => { txRef.current = tx }, [tx])
   useEffect(() => { tyRef.current = ty }, [ty])
   useEffect(() => { tsRef.current = ts }, [ts])
+
+  // ── Sync new nodes/edges arriving from the shared store ──────────────────
+  // (e.g. RAG-discovered entries added by the dashboard demo buttons)
+  useEffect(() => {
+    const knownIds = new Set(nodesRef.current.map(n => n.id))
+    const incoming = kbStore.nodes.filter(n => !knownIds.has(n.id))
+    if (incoming.length === 0) return
+
+    const newSimNodes: SimNode[] = incoming.map(node => {
+      const catNode = nodesRef.current.find(n => n.id === node.category)
+      return {
+        ...node,
+        x: catNode ? catNode.x + (Math.random() - 0.5) * 120 : SIM_W / 2,
+        y: catNode ? catNode.y + (Math.random() - 0.5) * 120 : SIM_H / 2,
+        vx: 0, vy: 0, pinned: false,
+      }
+    })
+
+    const knownEdgeIds = new Set(edgesRef.current.map(e => e.id))
+    const newEdges = kbStore.edges.filter(e => !knownEdgeIds.has(e.id))
+
+    nodesRef.current = [...nodesRef.current, ...newSimNodes]
+    edgesRef.current = [...edgesRef.current, ...newEdges]
+    setNodes([...nodesRef.current])
+    setEdges([...edgesRef.current])
+    startSim(0.4)
+  }, [kbStore.nodes, kbStore.edges])  // eslint-disable-line react-hooks/exhaustive-deps
 
   // Centre the graph on first render
   useEffect(() => {
@@ -645,6 +820,7 @@ export default function KnowledgeGraphPage() {
     e.stopPropagation()
     setSelected(prev => prev === id ? null : id)
     setIsAdding(false)
+    setIsAddingDomain(false)
   }
 
   const fitToView = () => {
@@ -655,6 +831,80 @@ export default function KnowledgeGraphPage() {
     setTy((rect.height - SIM_H) / 2)
     setTs(1)
   }
+
+  // ── Project management ────────────────────────────────────────────────────
+  const switchProject = useCallback((targetId: string) => {
+    if (targetId === activeProjectIdRef.current) return
+    // Snapshot current sim state back into projects
+    const currentKBNodes: KBNode[] = nodesRef.current.map(({ x, y, vx, vy, pinned, ...n }) => n)
+    setProjects(ps => ps.map(p =>
+      p.id === activeProjectIdRef.current
+        ? { ...p, nodes: currentKBNodes, edges: [...edgesRef.current] }
+        : p
+    ))
+    // Load target project
+    const target = projectsRef.current.find(p => p.id === targetId)
+    if (!target) return
+    cancelAnimationFrame(animRef.current)
+    const simN = initSimNodes(target.nodes)
+    nodesRef.current = simN
+    edgesRef.current = [...target.edges]
+    setNodes(simN)
+    setEdges([...target.edges])
+    setActiveProjectId(targetId)
+    setSelected(null)
+    setIsAdding(false)
+    setIsAddingDomain(false)
+    startSim(0.8)
+    setTimeout(fitToView, 0)
+  }, [startSim])  // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleCreateProject = useCallback(() => {
+    const name = newProjectName.trim()
+    if (!name) return
+    const id = `proj-${Date.now()}`
+    // Save current project first
+    const currentKBNodes: KBNode[] = nodesRef.current.map(({ x, y, vx, vy, pinned, ...n }) => n)
+    setProjects(ps => [
+      ...ps.map(p => p.id === activeProjectIdRef.current
+        ? { ...p, nodes: currentKBNodes, edges: [...edgesRef.current] }
+        : p
+      ),
+      { id, name, nodes: [], edges: [], createdAt: new Date().toISOString().split("T")[0] },
+    ])
+    cancelAnimationFrame(animRef.current)
+    nodesRef.current = []
+    edgesRef.current = []
+    setNodes([])
+    setEdges([])
+    setActiveProjectId(id)
+    setSelected(null)
+    setIsAdding(false)
+    setIsAddingDomain(false)
+    setShowNewProjectDialog(false)
+    setNewProjectName("")
+  }, [newProjectName])  // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleDeleteProject = useCallback((id: string) => {
+    const remaining = projectsRef.current.filter(p => p.id !== id)
+    if (remaining.length === 0) return
+    setProjects(remaining)
+    if (id === activeProjectIdRef.current) {
+      const next = remaining[0]
+      cancelAnimationFrame(animRef.current)
+      const simN = initSimNodes(next.nodes)
+      nodesRef.current = simN
+      edgesRef.current = [...next.edges]
+      setNodes(simN)
+      setEdges([...next.edges])
+      setActiveProjectId(next.id)
+      setSelected(null)
+      setIsAdding(false)
+      setIsAddingDomain(false)
+      startSim(0.8)
+      setTimeout(fitToView, 0)
+    }
+  }, [startSim])  // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── CRUD ──────────────────────────────────────────────────────────────────
   const handleDelete = (id: string) => {
@@ -678,6 +928,7 @@ export default function KnowledgeGraphPage() {
     setNodes(nextNodes)
     setEdges(nextEdges)
     setSelected(null)
+    setKBState(nextNodes.map(({ x, y, vx, vy, pinned, ...n }) => n), nextEdges)
     startSim(0.3)
   }
 
@@ -686,6 +937,7 @@ export default function KnowledgeGraphPage() {
       n.id === updated.id ? { ...n, ...updated } : n
     )
     setNodes([...nodesRef.current])
+    setKBState(nodesRef.current.map(({ x, y, vx, vy, pinned, ...n }) => n), edgesRef.current)
   }
 
   const handleAdd = (newNode: KBNode) => {
@@ -699,7 +951,9 @@ export default function KnowledgeGraphPage() {
     setNodes([...nodesRef.current])
     setEdges([...edgesRef.current])
     setIsAdding(false)
+    setIsAddingDomain(false)
     setSelected(newNode.id)
+    setKBState(nodesRef.current.map(({ x, y, vx, vy, pinned, ...n }) => n), edgesRef.current)
     startSim(0.6)
   }
 
@@ -710,7 +964,7 @@ export default function KnowledgeGraphPage() {
   const intentCount   = nodes.filter(n => n.type === "intent").length
   const hierCount     = edges.filter(e => e.type === "hierarchy").length
   const relCount      = edges.filter(e => e.type === "related").length
-  const isSidebarOpen = (selected && selectedNode) || isAdding
+  const isSidebarOpen = (selected && selectedNode) || isAdding || isAddingDomain
   const currentStage  = UPLOAD_STAGES[uploadStageIdx]
 
   return (
@@ -725,11 +979,18 @@ export default function KnowledgeGraphPage() {
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => { setIsAdding(true); setSelected(null) }}
+            onClick={() => { setIsAdding(true); setIsAddingDomain(false); setSelected(null) }}
             className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary/50 transition-colors"
           >
             <Plus className="size-4" />
             Add Node
+          </button>
+          <button
+            onClick={() => { setIsAddingDomain(true); setIsAdding(false); setSelected(null) }}
+            className="flex items-center gap-2 rounded-lg border border-cyan-500/40 bg-cyan-500/8 px-4 py-2 text-sm font-medium text-cyan-700 hover:bg-cyan-500/15 transition-colors"
+          >
+            <Globe className="size-4" />
+            Add Domain
           </button>
           <label className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground cursor-pointer hover:bg-primary/90 transition-colors">
             <Upload className="size-4" />
@@ -737,6 +998,42 @@ export default function KnowledgeGraphPage() {
             <input type="file" accept=".docx,.pdf,.txt" className="hidden" onChange={handleUpload} />
           </label>
         </div>
+      </div>
+
+      {/* ── Project Bar ── */}
+      <div className="flex items-center gap-2 px-8 py-2 border-b border-border bg-secondary/20 shrink-0 overflow-x-auto">
+        <span className="text-xs font-medium text-muted-foreground shrink-0 mr-1">Project:</span>
+        {projects.map(p => (
+          <div
+            key={p.id}
+            className={`group flex items-center gap-1 rounded-full text-xs font-medium transition-colors shrink-0 ${
+              p.id === activeProjectId
+                ? "bg-primary text-primary-foreground pl-3 pr-2 py-1"
+                : "bg-secondary/60 text-muted-foreground hover:bg-secondary pl-3 pr-2 py-1 cursor-pointer"
+            }`}
+          >
+            <button onClick={() => switchProject(p.id)} className="leading-none">{p.name}</button>
+            {projects.length > 1 && (
+              <button
+                onClick={e => { e.stopPropagation(); setDeleteConfirm(p.id) }}
+                className={`ml-0.5 rounded-full p-0.5 transition-colors ${
+                  p.id === activeProjectId
+                    ? "opacity-60 hover:opacity-100 hover:bg-primary-foreground/20"
+                    : "opacity-0 group-hover:opacity-60 hover:opacity-100! hover:text-destructive"
+                }`}
+              >
+                <X className="size-2.5" />
+              </button>
+            )}
+          </div>
+        ))}
+        <button
+          onClick={() => setShowNewProjectDialog(true)}
+          className="flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium text-muted-foreground border border-dashed border-border hover:border-primary hover:text-primary transition-colors shrink-0"
+        >
+          <Plus className="size-3" />
+          New Project
+        </button>
       </div>
 
       {/* ── Body ── */}
@@ -940,6 +1237,10 @@ export default function KnowledgeGraphPage() {
               onClose={() => setIsAdding(false)}
               onAdd={handleAdd}
             />
+          ) : isAddingDomain ? (
+            <RagDomainPanel
+              onClose={() => setIsAddingDomain(false)}
+            />
           ) : null
         )}
       </div>
@@ -964,6 +1265,67 @@ export default function KnowledgeGraphPage() {
                 />
               </div>
               <p className="text-xs text-muted-foreground mt-2">{currentStage?.pct ?? 5}% complete</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── New Project Dialog ── */}
+      {showNewProjectDialog && (
+        <div className="fixed inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl p-6 w-80">
+            <h3 className="font-semibold text-foreground mb-1">New Project</h3>
+            <p className="text-xs text-muted-foreground mb-4">Create an empty knowledge graph for a new product or team.</p>
+            <input
+              autoFocus
+              value={newProjectName}
+              onChange={e => setNewProjectName(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") handleCreateProject(); if (e.key === "Escape") { setShowNewProjectDialog(false); setNewProjectName("") } }}
+              placeholder="e.g. Acme Support, Internal IT…"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring mb-4"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={handleCreateProject}
+                disabled={!newProjectName.trim()}
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Plus className="size-3.5" />
+                Create
+              </button>
+              <button
+                onClick={() => { setShowNewProjectDialog(false); setNewProjectName("") }}
+                className="px-3 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:bg-secondary/50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Project Confirmation ── */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl p-6 w-80">
+            <h3 className="font-semibold text-foreground mb-1">Delete Project?</h3>
+            <p className="text-sm text-muted-foreground mb-5">
+              <span className="font-medium text-foreground">{projects.find(p => p.id === deleteConfirm)?.name}</span> and all its knowledge nodes will be permanently removed.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { handleDeleteProject(deleteConfirm); setDeleteConfirm(null) }}
+                className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-destructive px-3 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 transition-colors"
+              >
+                <Trash2 className="size-3.5" />
+                Delete
+              </button>
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="px-3 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:bg-secondary/50 transition-colors"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

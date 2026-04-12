@@ -8,32 +8,54 @@ import { DollarSign, Zap, Database, TrendingDown } from "lucide-react"
 
 const panels = [
   {
-    id: "support-1",
-    title: "Support Agent A",
-    description: "Customer support - West Coast",
+    id: "billing-1",
+    title: "PayFlow Support · Session 1",
+    description: "Customer billing inquiry",
     accentColor: "bg-primary",
     iconColor: "bg-primary-foreground/20",
+    suggestedQueries: [
+      "What are PayFlow's fees?",
+      "How do I send money?",
+      "What are the transfer limits?",
+      "How do I close my account?",
+    ],
   },
   {
-    id: "support-2",
-    title: "Support Agent B",
-    description: "Customer support - East Coast",
+    id: "billing-2",
+    title: "PayFlow Support · Session 2",
+    description: "Customer billing inquiry",
     accentColor: "bg-accent",
     iconColor: "bg-accent-foreground/20",
+    suggestedQueries: [
+      "What is the fee structure like?",
+      "Are there monthly fees?",
+      "How much does PayFlow charge?",
+      "How do I lock my wallet?",
+    ],
   },
   {
-    id: "sales-1",
-    title: "Sales Assistant",
-    description: "Pre-sales inquiries",
+    id: "developer-1",
+    title: "PayFlow Developer Support",
+    description: "API & integration questions",
     accentColor: "bg-emerald-700",
     iconColor: "bg-emerald-900/30",
+    suggestedQueries: [
+      "How do I use the newest PayFlow API?",
+      "Do you have webhooks?",
+      "Can I integrate PayFlow with my ecommerce platform?",
+    ],
   },
   {
-    id: "internal",
-    title: "Internal Helpdesk",
-    description: "Employee questions",
-    accentColor: "bg-amber-700",
-    iconColor: "bg-amber-900/30",
+    id: "security-1",
+    title: "PayFlow Support · Security",
+    description: "Urgent account security escalation",
+    accentColor: "bg-red-700",
+    iconColor: "bg-red-900/30",
+    suggestedQueries: [
+      "I was hacked by somebody. I need help getting my account back.",
+      "Suspicious activity on my account",
+      "How do I lock my wallet?",
+    ],
   },
 ]
 
@@ -98,7 +120,7 @@ export default function ChatDemoPage() {
           <div className="min-w-0">
             <h1 className="text-lg font-bold text-foreground">Multi-Agent Chat Demo</h1>
             <p className="text-xs text-muted-foreground">
-              4 agents, one shared cache. Ask the same question across panels to see cache hits.
+              PayFlow support demo — KB hits, semantic cache, RAG on whitelisted domains, and live agent escalation.
             </p>
           </div>
 
@@ -162,6 +184,7 @@ export default function ChatDemoPage() {
             description={panel.description}
             accentColor={panel.accentColor}
             iconColor={panel.iconColor}
+            suggestedQueries={panel.suggestedQueries}
             onRequestLogged={handleRequestLogged}
           />
         ))}

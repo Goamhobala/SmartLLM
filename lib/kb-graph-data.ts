@@ -20,6 +20,14 @@ export interface KBEdge {
   type: "hierarchy" | "related"
 }
 
+export interface KBProject {
+  id: string
+  name: string
+  nodes: KBNode[]
+  edges: KBEdge[]
+  createdAt: string
+}
+
 export interface SimNode extends KBNode {
   x: number
   y: number
@@ -271,6 +279,7 @@ export const PAYFLOW_NODES: KBNode[] = [
     exampleQueries: ["Where can I go in person?", "PayFlow office", "Physical location", "Find a kiosk"],
     status: "pending", hitCount: 456, lastUpdated: "2026-03-01",
   },
+
 ]
 
 export const PAYFLOW_EDGES: KBEdge[] = [
