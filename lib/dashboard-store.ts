@@ -48,7 +48,7 @@ export type DemoAction =
   | { type: "LLM_ROUTE_RAG_FORUM" }
   | { type: "LLM_ROUTE_DISCOUNT" }
   | { type: "IMAGE_CACHE_HIT" }
-  | { type: "BULK_50_KB" }
+  | { type: "BULK_50000_KB" }
   | { type: "RESET" }
 
 export function dashboardReducer(state: DashboardState, action: DemoAction): DashboardState {
@@ -194,23 +194,23 @@ export function dashboardReducer(state: DashboardState, action: DemoAction): Das
         cacheHits: state.cacheHits + 1,
       }
     }
-    case "BULK_50_KB": {
+    case "BULK_50000_KB": {
       const entry: RequestLogEntry = {
         id: `req-${++counter}`,
         time: getTimeString(),
-        query: "Batch: 50 verified queries",
+        query: "Batch: 50000 verified queries",
         model: "KB → Llama 3.2 3B",
         status: "verified",
-        cost: 0.0015,
+        cost: 0.0015 * 1000,
         latency: 97,
       }
       return {
         ...state,
         requests: [entry, ...state.requests],
-        totalRequests: state.totalRequests + 50,
-        costWithout: state.costWithout + 0.08,
-        costWith: state.costWith + 0.0015,
-        kbHits: state.kbHits + 50,
+        totalRequests: state.totalRequests + 50000,
+        costWithout: state.costWithout + 0.08 * 1000,
+        costWith: state.costWith + 0.0015 * 1000,
+        kbHits: state.kbHits + 50000,
         kbLatencies: [...state.kbLatencies, 97],
       }
     }
