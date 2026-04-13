@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mono" });
 
 export const metadata: Metadata = {
-  title: 'Smart LLM Gateway — Stop Overpaying for AI',
+  title: 'Smart LLM Gateway',
   description: 'An intelligent middleware API that slashes LLM costs by 40-60% and eliminates hallucination. Change one line of code.',
   icons: {
     icon: [
