@@ -44,6 +44,7 @@ export const CATEGORY_META: Record<string, { color: string; bg: string; label: s
   "technical-app":         { color: "#CA6F1E", bg: "#FAE5D3", label: "Technical & App" },
   "payflow-business":      { color: "#C0392B", bg: "#FADBD8", label: "PayFlow Business" },
   "contact-support":       { color: "#0E6655", bg: "#D1F2EB", label: "Contact & Support" },
+  "ecommerce-integration": { color: "#D35400", bg: "#F5CBA7", label: "E-Commerce Integrations" },
 }
 
 export const PAYFLOW_NODES: KBNode[] = [
@@ -90,6 +91,9 @@ export const PAYFLOW_NODES: KBNode[] = [
     answer: "How to reach PayFlow support and find kiosks.",
     exampleQueries: [], status: "pending", hitCount: 0, lastUpdated: "2026-03-01",
   },
+  { id: "cat-ecommerce", label: "E-Commerce Integrations", type: "category", category: "ecommerce-integration", answer: "", exampleQueries: [], status: "approved", hitCount: 0, lastUpdated: "2026-04-14" },
+  { id: "marketplace-sync", label: "Takealot & Shopify Sync", type: "intent", category: "ecommerce-integration", answer: "You can sync your merchant account directly with Shopify and Takealot. Go to Settings > Integrations and generate an API key. For local marketplaces, payouts in ZAR are settled within 24 hours directly to your linked business bank account.", exampleQueries: ["How do I link Shopify?", "Does it work with Takealot?", "ZAR settlement times for e-commerce"], status: "approved", hitCount: 840, lastUpdated: "2026-04-14" },
+  { id: "product-image-api", label: "Product Image API", type: "intent", category: "ecommerce-integration", answer: "Our SmartLLM Image Gateway automatically caches semantic variants of your product shots. If you generate a 'white ceramic mug on a sunny desk', subsequent requests for similar mugs will hit the cache, costing R0.00 and returning in ~12ms.", exampleQueries: ["How does image caching work?", "E-commerce image API", "Reduce DALL-E costs for products"], status: "approved", hitCount: 1205, lastUpdated: "2026-04-14" },
 
   // ── Account & Login ──────────────────────────────────────────────────────────
   {
@@ -317,6 +321,8 @@ export const PAYFLOW_EDGES: KBEdge[] = [
   { id: "r-sf-cs", source: "suspect-fraud",     target: "contact-support-intent", type: "related" },
   { id: "r-fp-cs", source: "failed-payment",    target: "contact-support-intent", type: "related" },
   { id: "r-oi-2f", source: "otp-issues",        target: "two-factor-auth",        type: "related" },
+  { id: "h-ecommerce", source: "cat-ecommerce", target: "marketplace-sync", type: "hierarchy" },
+  { id: "h-image-api", source: "cat-ecommerce", target: "product-image-api", type: "hierarchy" },
 ]
 
 const SIM_W = 900
