@@ -16,7 +16,7 @@ const steps = [
   {
     icon: TrendingDown,
     title: "Save money instantly",
-    description: "Verified answers from your knowledge base. Novel queries routed to the cheapest capable model.",
+    description: "RAG-grounded answers from your knowledge base. Novel queries route to Gemini 2.5 Flash Lite — optimised for cost and quality.",
     step: "03",
   },
 ]

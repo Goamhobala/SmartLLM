@@ -53,7 +53,7 @@ export function RequestLog({ requests }: RequestLogProps) {
                   <TableCell className="max-w-[240px] truncate text-xs font-medium text-foreground">{req.query}</TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">{req.model}</TableCell>
                   <TableCell><StatusBadge status={req.status} /></TableCell>
-                  <TableCell className="text-right font-mono text-xs text-foreground">${req.cost.toFixed(5)}</TableCell>
+                  <TableCell className="text-right font-mono text-xs text-foreground">R{req.cost.toFixed(5)}</TableCell>
                   <TableCell className="text-right font-mono text-xs text-muted-foreground">{req.latency}ms</TableCell>
                 </TableRow>
               ))}

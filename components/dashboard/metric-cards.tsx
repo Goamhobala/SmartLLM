@@ -36,7 +36,7 @@ export function MetricCards({ totalRequests, costWithout, costWith }: MetricCard
           </div>
           <div>
             <p className="text-xs font-medium text-muted-foreground">Cost Without Gateway</p>
-            <AnimatedCounter value={costWithout} prefix="$" decimals={5} className="text-2xl font-bold text-red-500" />
+            <AnimatedCounter value={costWithout} prefix="R" decimals={5} className="text-2xl font-bold text-red-500" />
           </div>
         </div>
       </div>
@@ -49,7 +49,7 @@ export function MetricCards({ totalRequests, costWithout, costWith }: MetricCard
           </div>
           <div>
             <p className="text-xs font-medium text-muted-foreground">Cost With Gateway</p>
-            <AnimatedCounter value={costWith} prefix="$" decimals={5} className="text-2xl font-bold text-emerald-500" />
+            <AnimatedCounter value={costWith} prefix="R" decimals={5} className="text-2xl font-bold text-emerald-500" />
           </div>
         </div>
       </div>
@@ -63,7 +63,7 @@ export function MetricCards({ totalRequests, costWithout, costWith }: MetricCard
           <div>
             <p className="text-xs font-medium text-emerald-600">You Saved</p>
             <div className="flex items-baseline gap-2">
-              <AnimatedCounter value={saved} prefix="$" decimals={5} className="text-2xl font-bold text-emerald-600" />
+              <AnimatedCounter value={saved} prefix="R" decimals={5} className="text-2xl font-bold text-emerald-600" />
               {costWithout > 0 && (
                 <AnimatedCounter value={savedPct} suffix="%" decimals={1} className="text-sm font-semibold text-emerald-500" />
               )}

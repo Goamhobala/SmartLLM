@@ -31,7 +31,7 @@ export default function ImageDemoPage() {
       setResult({
         imageSrc: "/images/white-tshirt-product.jpg",
         model: "DALL-E 3",
-        cost: "$0.04",
+        cost: "R0.74",
         time: "4.2s",
         isCached: false,
       })
@@ -42,7 +42,7 @@ export default function ImageDemoPage() {
       setResult({
         imageSrc: "/images/white-tshirt-product.jpg",
         model: "Cache (Semantic Match)",
-        cost: "$0.00",
+        cost: "R0.00",
         time: "12ms",
         isCached: true,
       })
@@ -142,7 +142,7 @@ export default function ImageDemoPage() {
                 </div>
                 {result.isCached && (
                   <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-400">
-                    Cache Hit — $0.04 saved
+                    Cache Hit — R0.74 saved
                   </span>
                 )}
               </div>
@@ -153,7 +153,7 @@ export default function ImageDemoPage() {
         {/* Explainer */}
         <div className="mt-6 rounded-lg border border-[oklch(0.25_0.03_260)] bg-[oklch(0.16_0.02_260)] p-4">
           <p className="text-xs leading-relaxed text-[oklch(0.55_0.02_260)]">
-            <strong className="text-[oklch(0.75_0.005_260)]">How it works:</strong> The first generation routes to DALL-E 3 (~4s, $0.04). Subsequent semantically similar prompts (e.g. &quot;white tee product shot&quot;) return cached results instantly (12ms, $0.00). Perfect for e-commerce catalogs generating multiple variations.
+            <strong className="text-[oklch(0.75_0.005_260)]">How it works:</strong> The first generation routes to DALL-E 3 (~4s, R0.74). Subsequent semantically similar prompts (e.g. &quot;white tee product shot&quot;) return cached results instantly (12ms, R0.00). Perfect for e-commerce catalogs generating multiple variations.
           </p>
         </div>
       </div>

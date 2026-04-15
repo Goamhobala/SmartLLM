@@ -540,7 +540,7 @@ export function ChatPanel({
                           (msg.meta.cached || msg.meta.route === "kb") ? "text-emerald-600" : "",
                         )}>
                           <DollarSign className="size-3.5" />
-                          {msg.meta.cost === 0 ? "FREE" : `$${msg.meta.cost.toFixed(5)}`}
+                          {msg.meta.cost === 0 ? "FREE" : `R${msg.meta.cost.toFixed(5)}`}
                         </span>
 
                         {msg.meta.cached && (

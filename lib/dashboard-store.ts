@@ -60,15 +60,15 @@ export function dashboardReducer(state: DashboardState, action: DemoAction): Das
         query: "How do I reset my password?",
         model: "KB → Llama 3.2 3B",
         status: "verified",
-        cost: 0.00003,
+        cost: 0.00056,
         latency: 95,
       }
       return {
         ...state,
         requests: [entry, ...state.requests],
         totalRequests: state.totalRequests + 1,
-        costWithout: state.costWithout + 0.0016,
-        costWith: state.costWith + 0.00003,
+        costWithout: state.costWithout + 0.0296,
+        costWith: state.costWith + 0.00056,
         kbHits: state.kbHits + 1,
         kbLatencies: [...state.kbLatencies, 95],
       }
@@ -80,15 +80,15 @@ export function dashboardReducer(state: DashboardState, action: DemoAction): Das
         query: "I forgot my login info, help?",
         model: "KB → Llama 3.2 3B",
         status: "verified",
-        cost: 0.00003,
+        cost: 0.00056,
         latency: 102,
       }
       return {
         ...state,
         requests: [entry, ...state.requests],
         totalRequests: state.totalRequests + 1,
-        costWithout: state.costWithout + 0.0016,
-        costWith: state.costWith + 0.00003,
+        costWithout: state.costWithout + 0.0296,
+        costWith: state.costWith + 0.00056,
         kbHits: state.kbHits + 1,
         kbLatencies: [...state.kbLatencies, 102],
       }
@@ -100,15 +100,15 @@ export function dashboardReducer(state: DashboardState, action: DemoAction): Das
         query: "How can I cancel my subscription?",
         model: "KB → Llama 3.2 3B",
         status: "verified",
-        cost: 0.00003,
+        cost: 0.00056,
         latency: 88,
       }
       return {
         ...state,
         requests: [entry, ...state.requests],
         totalRequests: state.totalRequests + 1,
-        costWithout: state.costWithout + 0.0016,
-        costWith: state.costWith + 0.00003,
+        costWithout: state.costWithout + 0.0296,
+        costWith: state.costWith + 0.00056,
         kbHits: state.kbHits + 1,
         kbLatencies: [...state.kbLatencies, 88],
       }
@@ -118,9 +118,9 @@ export function dashboardReducer(state: DashboardState, action: DemoAction): Das
         id: `req-${++counter}`,
         time: getTimeString(),
         query: "Do you integrate with Zapier?",
-        model: "GPT-4.1 Mini",
+        model: "Gemini 2.5 Flash Lite",
         status: "review",
-        cost: 0.0016,
+        cost: 0.0056,
         latency: 820,
       }
       addPendingKBEntry({
@@ -138,8 +138,8 @@ export function dashboardReducer(state: DashboardState, action: DemoAction): Das
         ...state,
         requests: [entry, ...state.requests],
         totalRequests: state.totalRequests + 1,
-        costWithout: state.costWithout + 0.0016,
-        costWith: state.costWith + 0.0016,
+        costWithout: state.costWithout + 0.0296,
+        costWith: state.costWith + 0.0056,
         llmRoutes: state.llmRoutes + 1,
         llmLatencies: [...state.llmLatencies, 820],
       }
@@ -149,9 +149,9 @@ export function dashboardReducer(state: DashboardState, action: DemoAction): Das
         id: `req-${++counter}`,
         time: getTimeString(),
         query: "Can I get a bulk discount for my team?",
-        model: "GPT-4.1 Mini",
+        model: "Gemini 2.5 Flash Lite",
         status: "review",
-        cost: 0.0018,
+        cost: 0.0056,
         latency: 910,
       }
       addPendingKBEntry({
@@ -169,8 +169,8 @@ export function dashboardReducer(state: DashboardState, action: DemoAction): Das
         ...state,
         requests: [entry, ...state.requests],
         totalRequests: state.totalRequests + 1,
-        costWithout: state.costWithout + 0.0018,
-        costWith: state.costWith + 0.0018,
+        costWithout: state.costWithout + 0.0333,
+        costWith: state.costWith + 0.0056,
         llmRoutes: state.llmRoutes + 1,
         llmLatencies: [...state.llmLatencies, 910],
       }
@@ -189,7 +189,7 @@ export function dashboardReducer(state: DashboardState, action: DemoAction): Das
         ...state,
         requests: [entry, ...state.requests],
         totalRequests: state.totalRequests + 1,
-        costWithout: state.costWithout + 0.04,
+        costWithout: state.costWithout + 0.74,
         costWith: state.costWith + 0,
         cacheHits: state.cacheHits + 1,
       }
@@ -201,15 +201,15 @@ export function dashboardReducer(state: DashboardState, action: DemoAction): Das
         query: "Batch: 50000 verified queries",
         model: "KB → Llama 3.2 3B",
         status: "verified",
-        cost: 0.0015 * 1000,
+        cost: 0.0278 * 1000,
         latency: 97,
       }
       return {
         ...state,
         requests: [entry, ...state.requests],
         totalRequests: state.totalRequests + 50000,
-        costWithout: state.costWithout + 0.08 * 1000,
-        costWith: state.costWith + 0.0015 * 1000,
+        costWithout: state.costWithout + 1.48 * 1000,
+        costWith: state.costWith + 0.0278 * 1000,
         kbHits: state.kbHits + 50000,
         kbLatencies: [...state.kbLatencies, 97],
       }
