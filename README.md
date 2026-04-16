@@ -112,31 +112,6 @@ The dashboard has a collapsible control panel with buttons that simulate events 
 
 For the demo, there is no backend. All data is hardcoded or stored in React state.
 
-## Cost Breakdown
-
-### Demo
-
-| Service | Cost |
-|---------|------|
-| Vercel Hobby | $0 |
-| Supabase Free | $0 |
-| LLM APIs | $0 (mocked) |
-| **Total** | **$0/month** |
-
-### Production (one customer, 50K queries/day)
-
-| Service | Monthly Cost |
-|---------|-------------|
-| Vercel Pro | $20 |
-| Supabase Pro | $25–75 |
-| Embeddings | ~$1 |
-| Tier 1 SLM rewrites | ~$2.50 |
-| Tier 2 RAG | ~$56–130 |
-| **Total infra** | **~$105–235/month** |
-| Customer saves | ~$2,165–2,295/month |
-| We charge (20% of savings) | ~$430–460/month |
-| **Gross margin** | **~50–75%** |
-
 ## Project Structure
 
 ```
