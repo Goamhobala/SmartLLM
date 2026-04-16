@@ -10,7 +10,7 @@ const navItems = [
   { href: "/chat-demo", label: "Chat Demo", icon: MessageSquare },
   { href: "/knowledge-base", label: "Knowledge Base", icon: BookOpen },
   { href: "/image-demo", label: "Image Demo", icon: ImageIcon },
-  { href: "/image-interceptor", label: "Image Interceptor", icon: ImageIcon },
+  { href: "/image-interceptor", label: "Image Knowledge Base", icon: ImageIcon },
 ]
 
 export function AppSidebar() {

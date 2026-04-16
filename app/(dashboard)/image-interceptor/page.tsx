@@ -336,14 +336,14 @@ export default function ImageInterceptorPage() {
               </button>
             </div>
 
-            {/* If it's an Image node, show a placeholder image box */}
-            {selectedNode.type === "image" && (
-              <div className="mb-6 aspect-video w-full rounded-lg border border-border bg-muted flex items-center justify-center overflow-hidden">
-                {/* Embed an actual image here using next/image once you have the assets */}
-                <div className="flex flex-col items-center opacity-50">
-                  <ImageIcon className="size-8 mb-2" />
-                  <span className="text-xs font-mono">{selectedNode.imageUrl}</span>
-                </div>
+            {/* If it's an Image node, show the actual image */}
+            {selectedNode.type === "image" && selectedNode.imageUrl && (
+              <div className="mb-6 relative aspect-video w-full rounded-lg border border-border bg-muted overflow-hidden">
+                <img 
+                  src={selectedNode.imageUrl} 
+                  alt={selectedNode.label}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
               </div>
             )}
 
