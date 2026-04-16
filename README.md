@@ -4,6 +4,8 @@ An intelligent API middleware that sits between enterprise applications and LLM 
 
 > "LLMs hallucinate. Scripts feel robotic. We solved both."
 
+Try it now: https://smart-llm.vercel.app/
+
 ## What This Is
 
 This is a **demo frontend** for a New Venture Planning course final exam pitch. The backend is not fully functional — all dashboard data is hardcoded or mocked. The goal is to visually demonstrate how the product works during a live projector presentation.
