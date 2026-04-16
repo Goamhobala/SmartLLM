@@ -1,10 +1,27 @@
+"use client"
+
 import { AppSidebar } from "@/components/app-sidebar"
+import { LoginModal } from "@/components/onboarding/login-modal"
+import { OnboardingCarousel } from "@/components/onboarding/onboarding-carousel"
+import { useAuth } from "@/components/onboarding/auth-provider"
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const { auth, login, completeOnboarding } = useAuth()
+
+  // Show login if not logged in
+  if (!auth.isLoggedIn) {
+    return <LoginModal onLoginSuccess={login} />
+  }
+
+  // Show onboarding carousel if not completed
+  if (!auth.hasSeenOnboarding) {
+    return <OnboardingCarousel onComplete={completeOnboarding} />
+  }
+
   return (
     <div className="flex min-h-screen">
       <AppSidebar />

@@ -28,7 +28,7 @@ export function HeroSection() {
           <span className="text-accent">for AI.</span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg text-muted-foreground md:text-xl">
-          Our gateway slashes LLM costs by 40–60% and eliminates hallucination. Change one line of code.
+          Our gateway cuts LLM costs by up to 68% and dramatically reduces hallucination with RAG-verified answers. Change one line of code.
         </p>
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
@@ -53,6 +53,36 @@ export function HeroSection() {
             <span className="text-muted-foreground">{'// After: '}</span>{' '}
             <span className="text-accent">gateway.smartllm.io</span>
           </code>
+        </div>
+
+        {/* Research credibility strip */}
+        <div className="mx-auto mt-10 max-w-3xl">
+          <p className="mb-4 text-xs font-medium uppercase tracking-wider text-muted-foreground text-center">Backed by research</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {[
+              {
+                stat: "Up to 68%",
+                desc: "reduction in API calls via semantic caching",
+                source: "Regmi & Pun, arXiv 2024",
+              },
+              {
+                stat: "40% of issues",
+                desc: "resolved by AI without human agents by 2027",
+                source: "Gartner, 2024",
+              },
+              {
+                stat: "Significant↓",
+                desc: "hallucination rate when RAG is applied to LLM responses",
+                source: "Nishisako et al., PubMed 2025",
+              },
+            ].map((r) => (
+              <div key={r.stat} className="rounded-lg border border-border/60 bg-card px-4 py-3 text-center">
+                <p className="text-lg font-bold text-accent">{r.stat}</p>
+                <p className="mt-1 text-xs text-foreground leading-snug">{r.desc}</p>
+                <p className="mt-1.5 text-xs text-muted-foreground">{r.source}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
